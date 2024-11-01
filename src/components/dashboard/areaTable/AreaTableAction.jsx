@@ -36,17 +36,17 @@ const AreaTableAction = () => {
             <ul className="dropdown-menu-list">
               <li className="dropdown-menu-item">
                 <Link to="/" className="dropdown-menu-link">
-                  View
+                  Ver
                 </Link>
               </li>
               <li className="dropdown-menu-item">
                 <Link to="/edit" className="dropdown-menu-link">
-                  Edit
+                  Editar
                 </Link>
               </li>
               <li className="dropdown-menu-item">
                 <Link to="/delete" className="dropdown-menu-link">
-                  Delete
+                  Borrar
                 </Link>
               </li>
             </ul>

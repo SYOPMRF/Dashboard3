@@ -15,7 +15,7 @@ import "./AreaCharts.scss";
 
 const data = [
   {
-    month: "Jan",
+    month: "Ene",
     loss: 70,
     profit: 100,
   },
@@ -30,12 +30,12 @@ const data = [
     profit: 90,
   },
   {
-    month: "April",
+    month: "Abril",
     loss: 90,
     profit: 70,
   },
   {
-    month: "May",
+    month: "Mayo",
     loss: 55,
     profit: 80,
   },
@@ -50,7 +50,7 @@ const data = [
     profit: 75,
   },
   {
-    month: "Aug",
+    month: "Ago",
     loss: 62,
     profit: 86,
   },
@@ -79,12 +79,9 @@ const AreaBarChart = () => {
   return (
     <div className="bar-chart">
       <div className="bar-chart-info">
-        <h5 className="bar-chart-title">Total Revenue</h5>
+        <h5 className="bar-chart-title">Puntajes Históricos</h5>
         <div className="chart-info-data">
-          <div className="info-data-value">$50.4K</div>
           <div className="info-data-text">
-            <FaArrowUpLong />
-            <p>5% than last month.</p>
           </div>
         </div>
       </div>

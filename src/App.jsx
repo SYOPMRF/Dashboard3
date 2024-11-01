@@ -7,6 +7,7 @@ import MoonIcon from "./assets/icons/moon.svg";
 import SunIcon from "./assets/icons/sun.svg";
 import BaseLayout from "./layout/BaseLayout";
 import { Dashboard, PageNotFound } from "./screens";
+import { supabase } from "./supabase/supabase";
 
 function App() {
   const { theme, toggleTheme } = useContext(ThemeContext);
@@ -20,7 +21,21 @@ function App() {
     }
   }, [theme]);
 
-  return (
+   // adding dark-mode class if the dark mode is set on to the body tag
+   useEffect(() => {
+    const test = async () => {
+      const {data,error} = await supabase.from("administrativo").select() 
+      if (error) {
+        return 
+      }
+      console.log(data)
+    }
+
+    test();
+  }, []);
+
+
+return (
     <>
       <Router>
         <Routes>

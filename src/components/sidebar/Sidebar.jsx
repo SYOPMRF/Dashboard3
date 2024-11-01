@@ -52,7 +52,7 @@ const Sidebar = () => {
           <img src={theme === LIGHT_THEME ? LogoBlue : LogoWhite} alt="" />
           <span className="sidebar-brand-text">Canvis</span>
         </div>
-        <button className="sidebar-close-btn" onClick={closeSidebar}>
+        <button className="sidebar-close-btn" onClick={closeSidebar} aria-label="Cerrar barra lateral">
           <MdOutlineClose size={24} />
         </button>
       </div>
