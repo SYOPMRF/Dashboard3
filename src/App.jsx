@@ -26,7 +26,7 @@ function App() {
         <Routes>
           <Route element={<BaseLayout />}>
             <Route path="/" element={<Dashboard />} />
-            <Route path="*" element={<PageNotFound />} />
+            <Route path="/edit" element={<PageNotFound />} />
           </Route>
         </Routes>
 
