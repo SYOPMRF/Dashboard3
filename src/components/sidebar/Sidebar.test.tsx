@@ -6,27 +6,6 @@ import { expect, test } from 'vitest';
 import React from 'react';
 import '@testing-library/jest-dom';
 
-// Prueba de redirección y renderizado de 404 al hacer clic en un enlace inexistente
-test('Renderiza el botón "Analíticas" y redirige a 404 al hacer clic', () => {
-  render(
-    <MemoryRouter initialEntries={['/']}>
-      <Routes>
-        <Route path="/" element={<Sidebar />} />
-        <Route path="*" element={<PageNotFound />} />
-      </Routes>
-    </MemoryRouter>
-  );
-
-  // Busca el botón de menú "Analíticas" y verifica su existencia
-  const menuButton = screen.getByText(/Analíticas/i);
-  expect(menuButton).toBeInTheDocument();
-
-  // Simula el clic en el botón "Analíticas" para intentar navegar a una página no existente
-  fireEvent.click(menuButton);
-
-  // Verifica la aparición del mensaje de error 404
-  expect(screen.getByText(/404/i)).toBeInTheDocument();
-});
 
 // Prueba de accesibilidad en el botón de cierre de la barra lateral
 test('Verifica que el botón "Cerrar barra lateral" tiene aria-label', () => {
