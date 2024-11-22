@@ -22,7 +22,7 @@ const TABLE_DATA = [
     amount: 400,
   },
   {
-    id: 100,
+    id: 200,
     name: "Caín",
     order_id: 11232,
     date: "Junio 29,2045",

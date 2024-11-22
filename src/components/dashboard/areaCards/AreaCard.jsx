@@ -33,7 +33,7 @@ const AreaCard = ({ colors, percentFillValue, cardInfo }) => {
             cx={50}
             cy={45}
             innerRadius={20}
-            fill="#e4e8ef"
+            fill="#ff0004"
             paddingAngle={0}
             dataKey="value"
             startAngle={-270}

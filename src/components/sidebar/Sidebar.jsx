@@ -68,15 +68,15 @@ const Sidebar = () => {
               </Link>
             </li>
             <li className="menu-item">
-              <Link to="/edit" className="menu-link">
+              <Link to="/logros" className="menu-link">
                 <span className="menu-link-icon">
                   <MdOutlineBarChart size={20} />
                 </span>
-                <span className="menu-link-text">Analíticas</span>
+                <span className="menu-link-text">Logros</span>
               </Link>
             </li>
             <li className="menu-item">
-              <Link to="/edit" className="menu-link">
+              <Link to="/tabla" className="menu-link">
                 <span className="menu-link-icon">
                   <MdOutlineAttachMoney size={20} />
                 </span>
@@ -84,11 +84,19 @@ const Sidebar = () => {
               </Link>
             </li>
             <li className="menu-item">
-              <Link to="/edit" className="menu-link">
+              <Link to="/notificaciones" className="menu-link">
                 <span className="menu-link-icon">
                   <MdOutlineCurrencyExchange size={18} />
                 </span>
-                <span className="menu-link-text">Logros</span>
+                <span className="menu-link-text">Notificaciones</span>
+              </Link>
+            </li>
+            <li className="menu-item">
+              <Link to="/desafios" className="menu-link">
+                <span className="menu-link-icon">
+                  <MdOutlineCurrencyExchange size={18} />
+                </span>
+                <span className="menu-link-text">Desafíos</span>
               </Link>
             </li>
           </ul>
