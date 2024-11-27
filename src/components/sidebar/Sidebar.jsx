@@ -1,4 +1,4 @@
-import { useContext, useEffect, useRef } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import { ThemeContext } from "../../context/ThemeContext";
 import { LIGHT_THEME } from "../../constants/themeConstants";
 import LogoBlue from "../../assets/images/logo_blue.svg";
@@ -20,9 +20,16 @@ import "./Sidebar.scss";
 import { SidebarContext } from "../../context/SidebarContext";
 
 const Sidebar = () => {
+  const handleRedirect = () => {
+    // URL del proyecto en Vercel que contiene el formulario
+    const url = 'https://proyecto-web-umber.vercel.app/';
+    window.location.href = url;
+  };
+  
   const { theme } = useContext(ThemeContext);
   const { isSidebarOpen, closeSidebar } = useContext(SidebarContext);
   const navbarRef = useRef(null);
+  const [activeLink, setActiveLink] = useState("/"); // Estado para el enlace activo
 
   // closing the navbar when clicked outside the sidebar area
   const handleClickOutside = (event) => {
@@ -49,8 +56,14 @@ const Sidebar = () => {
     >
       <div className="sidebar-top">
         <div className="sidebar-brand">
+        <button onClick={handleRedirect}>
           <img src={theme === LIGHT_THEME ? LogoBlue : LogoWhite} alt="" />
-          <span className="sidebar-brand-text">Canvis</span>
+        </button>
+          <span>
+            <button className="sidebar-brand-text" onClick={handleRedirect}>
+            Canvis
+            </button>
+          </span>
         </div>
         <button className="sidebar-close-btn" onClick={closeSidebar} aria-label="Cerrar barra lateral">
           <MdOutlineClose size={24} />
@@ -60,15 +73,15 @@ const Sidebar = () => {
         <div className="sidebar-menu">
           <ul className="menu-list">
             <li className="menu-item">
-              <Link to="/" className="menu-link active">
-                <span className="menu-link-icon">
-                  <MdOutlineGridView size={18} />
-                </span>
-                <span className="menu-link-text">Dashboard</span>
-              </Link>
+            <Link to="/" className={`menu-link ${activeLink === "/" ? "active" : ""}`} onClick={() => setActiveLink("/")}>
+              <span className="menu-link-icon">
+                <MdOutlineGridView size={18} />
+              </span>
+              <span className="menu-link-text">Dashboard</span>
+            </Link>
             </li>
             <li className="menu-item">
-              <Link to="/logros" className="menu-link">
+            <Link to="/logros" className={`menu-link ${activeLink === "/logros" ? "active" : ""}`} onClick={() => setActiveLink("/logros")}>
                 <span className="menu-link-icon">
                   <MdOutlineBarChart size={20} />
                 </span>
@@ -76,7 +89,7 @@ const Sidebar = () => {
               </Link>
             </li>
             <li className="menu-item">
-              <Link to="/tabla" className="menu-link">
+            <Link to="/tabla" className={`menu-link ${activeLink === "/tabla" ? "active" : ""}`} onClick={() => setActiveLink("/tabla")}>
                 <span className="menu-link-icon">
                   <MdOutlineAttachMoney size={20} />
                 </span>
@@ -84,7 +97,7 @@ const Sidebar = () => {
               </Link>
             </li>
             <li className="menu-item">
-              <Link to="/notificaciones" className="menu-link">
+            <Link to="/notificaciones" className={`menu-link ${activeLink === "/notificaciones" ? "active" : ""}`} onClick={() => setActiveLink("/notificaciones")}>
                 <span className="menu-link-icon">
                   <MdOutlineCurrencyExchange size={18} />
                 </span>
@@ -92,7 +105,7 @@ const Sidebar = () => {
               </Link>
             </li>
             <li className="menu-item">
-              <Link to="/desafios" className="menu-link">
+            <Link to="/desafios" className={`menu-link ${activeLink === "/desafios" ? "active" : ""}`} onClick={() => setActiveLink("/desafios")}>
                 <span className="menu-link-icon">
                   <MdOutlineCurrencyExchange size={18} />
                 </span>
