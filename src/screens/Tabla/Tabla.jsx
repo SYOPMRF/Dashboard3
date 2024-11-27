@@ -33,7 +33,9 @@ const TablaClasificacion = () => {
   const [ranking, setRanking] = useState([]); // Estado para almacenar los datos de Supabase
   const [search, setSearch] = useState("");
   const [sortConfig, setSortConfig] = useState({ key: "points", direction: "desc" });
+  const [error, setError] = useState(null);
 
+  
   // Usar useEffect para cargar los datos desde Supabase cuando el componente se monta
   useEffect(() => {
     const fetchRanking = async () => {
@@ -44,6 +46,8 @@ const TablaClasificacion = () => {
       
       if (error) {
         console.error('Error fetching ranking:', error.message);
+        setError("No se pudo cargar la tabla. Por favor, inténtalo más tarde.");
+        alert("No se pudieron obtener los valores. Intenta de nuevo.");
       } else {
         setRanking(data);  // Establecer los datos en el estado
       }
@@ -70,6 +74,15 @@ const TablaClasificacion = () => {
 
     setRanking(sortedData);
   };
+
+  if (error) {
+    return (
+      <div style={{ padding: "20px", textAlign: "center", color: "#ff0004" }}>
+        <h1>Error</h1>
+        <p>{error}</p>
+      </div>
+    );
+  }
 
   return (
     <div style={{ padding: "20px", textAlign: "center" }}>
