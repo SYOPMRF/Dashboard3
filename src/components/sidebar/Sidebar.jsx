@@ -1,4 +1,5 @@
 import { useContext, useEffect, useRef, useState } from "react";
+import { useLocation } from 'react-router-dom';
 import { ThemeContext } from "../../context/ThemeContext";
 import { LIGHT_THEME } from "../../constants/themeConstants";
 import LogoBlue from "../../assets/images/logo_blue.svg";
@@ -29,7 +30,8 @@ const Sidebar = () => {
   const { theme } = useContext(ThemeContext);
   const { isSidebarOpen, closeSidebar } = useContext(SidebarContext);
   const navbarRef = useRef(null);
-  const [activeLink, setActiveLink] = useState("/"); // Estado para el enlace activo
+  const location = useLocation(); // Obtiene la ubicación actual de la ruta
+  const [activeLink, setActiveLink] = useState(location.pathname); // Sincroniza el estado con la ruta actual
 
   // closing the navbar when clicked outside the sidebar area
   const handleClickOutside = (event) => {
@@ -41,6 +43,11 @@ const Sidebar = () => {
       closeSidebar();
     }
   };
+
+  // Efecto para actualizar activeLink al cambiar la ruta
+  useEffect(() => {
+    setActiveLink(location.pathname);
+  }, [location]);
 
   useEffect(() => {
     document.addEventListener("mousedown", handleClickOutside);
