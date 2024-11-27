@@ -6,7 +6,7 @@ import { Dashboard } from "../screens";
 
 
 describe("Dashboard", () => {
-  test("should render the title", () => {
+  test("debería renderizarl el título", () => {
     render(<Dashboard title="Titulo" />);
     
     const titleElement = screen.getByText(/Titulo/i);

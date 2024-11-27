@@ -1,4 +1,7 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
+import "./Tabla.scss";
+import { MdOutlineMenu } from "react-icons/md";
+import { SidebarContext } from "../../context/SidebarContext";
 import { supabase } from "../../supabase/supabase";  // Asegúrate de importar el cliente
 
 // Función para descargar la tabla como CSV
@@ -26,6 +29,7 @@ const downloadCSV = (data) => {
 };
 
 const TablaClasificacion = () => {
+  const { openSidebar } = useContext(SidebarContext);
   const [ranking, setRanking] = useState([]); // Estado para almacenar los datos de Supabase
   const [search, setSearch] = useState("");
   const [sortConfig, setSortConfig] = useState({ key: "points", direction: "desc" });
@@ -69,6 +73,17 @@ const TablaClasificacion = () => {
 
   return (
     <div style={{ padding: "20px", textAlign: "center" }}>
+      <section className="content-area-top">
+        <div className="area-top-l">
+            <button
+              className="sidebar-open-btn"
+              type="button"
+              onClick={openSidebar}
+            >
+              <MdOutlineMenu size={50} />
+            </button>
+        </div>
+      </section>
       <h1 style={{ fontSize: "2.5rem", marginBottom: "20px", color: "#ff0004" }}>Tabla de Clasificación</h1>
       <p style={{ fontSize: "1.2rem", marginBottom: "30px" }}>Revisa quién lidera la competencia.</p>
 

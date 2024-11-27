@@ -1,9 +1,15 @@
-import { useState, useEffect } from "react";
+import { useContext, useState, useEffect } from "react";
+import { MdOutlineMenu } from "react-icons/md";
+import { SidebarContext } from "../../context/SidebarContext";
 import { supabase2 } from "../../supabase/supabase";
 import jsPDF from "jspdf";
+import "./Logros.scss";
 import "jspdf-autotable";
 
 const Logros = () => {
+
+  const { openSidebar } = useContext(SidebarContext);
+
   const [badges, setBadges] = useState([
     {
       id: 12,
@@ -52,7 +58,7 @@ const Logros = () => {
     // Verificar que la respuesta no es undefined o nula
     if (!response || response.error) {
       console.error("Error al obtener los scores:", response?.error?.message);
-      alert("No se pudieron obtener los scores. Intenta de nuevo.");
+      alert("No se pudieron obtener los puntajes. Intenta de nuevo.");
       setLoading(false);
       return; // Detener ejecución si hay error
     }
@@ -108,6 +114,17 @@ const Logros = () => {
 
   return (
     <div id="dashboard" style={{ textAlign: "center", padding: "20px" }}>
+      <section className="content-area-top">
+        <div className="area-top-l">
+            <button
+              className="sidebar-open-btn"
+              type="button"
+              onClick={openSidebar}
+            >
+              <MdOutlineMenu size={50} />
+            </button>
+        </div>
+      </section>
       <h1 style={{ fontSize: "2.5rem", marginBottom: "20px", color: "#ff0004" }}>
         Insignias y Logros
       </h1>

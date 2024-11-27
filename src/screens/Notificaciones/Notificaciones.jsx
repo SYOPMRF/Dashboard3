@@ -1,6 +1,11 @@
-import { useState } from "react";
+import { useState, useContext } from "react";
+import { MdOutlineMenu } from "react-icons/md";
+import { SidebarContext } from "../../context/SidebarContext";
+import "./Notificaciones.scss";
 
 const Notificaciones = () => {
+
+  const { openSidebar } = useContext(SidebarContext);
   // Datos iniciales de las notificaciones
   const [notifications, setNotifications] = useState([
     { id: 1, title: "Nueva tarea asignada", message: "Tienes una nueva tarea pendiente.", isRead: false },
@@ -32,6 +37,17 @@ const Notificaciones = () => {
 
   return (
     <div style={{ textAlign: "center", padding: "20px" }}>
+      <section className="content-area-top">
+        <div className="area-top-l">
+            <button
+              className="sidebar-open-btn"
+              type="button"
+              onClick={openSidebar}
+            >
+              <MdOutlineMenu size={50} />
+            </button>
+        </div>
+      </section>
       <h1 style={{ fontSize: "2.5rem", marginBottom: "20px", color: "#ff0004" }}>
         Notificaciones
       </h1>

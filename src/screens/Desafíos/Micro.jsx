@@ -1,4 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
+import { MdOutlineMenu } from "react-icons/md";
+import "./Micro.scss";
+import { SidebarContext } from "../../context/SidebarContext";
 
 // Datos de ejemplo de los microdesafíos disponibles
 const desafios = [
@@ -15,6 +18,7 @@ const desafios = [
 ];
 
 const Micro = () => {
+  const { openSidebar } = useContext(SidebarContext);
   const [challenges, setChallenges] = useState(desafios);
   const [completedFilter, setCompletedFilter] = useState("all");
   const [currentPage, setCurrentPage] = useState(1);
@@ -52,6 +56,17 @@ const Micro = () => {
 
   return (
     <div style={{ padding: "20px", textAlign: "center" }}>
+      <section className="content-area-top">
+        <div className="area-top-l">
+            <button
+              className="sidebar-open-btn"
+              type="button"
+              onClick={openSidebar}
+            >
+              <MdOutlineMenu size={50} />
+            </button>
+        </div>
+      </section>
       <h1 style={{ fontSize: "2.5rem", marginBottom: "20px", color: "#ff0004" }}>Microdesafíos Disponibles</h1>
       <p style={{ fontSize: "1.2rem", marginBottom: "30px" }}>
         ¡Diviértete y aprende con estos microdesafíos!
