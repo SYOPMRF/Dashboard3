@@ -125,20 +125,12 @@ const Sidebar = () => {
         <div className="sidebar-menu sidebar-menu2">
           <ul className="menu-list">
             <li className="menu-item">
-              <Link to="/" className="menu-link">
-                <span className="menu-link-icon">
-                  <MdOutlineSettings size={20} />
-                </span>
-                <span className="menu-link-text">Configuraciones</span>
-              </Link>
-            </li>
-            <li className="menu-item">
-              <Link to="/" className="menu-link">
+              <button className="menu-link menu-link-volver" onClick={handleRedirect}>
                 <span className="menu-link-icon">
                   <MdOutlineLogout size={20} />
                 </span>
-                <span className="menu-link-text">Cerrar sesión</span>
-              </Link>
+                <span className="menu-link-text">Volver atrás</span>
+              </button>
             </li>
           </ul>
         </div>
