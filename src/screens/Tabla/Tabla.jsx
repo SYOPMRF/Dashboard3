@@ -57,8 +57,9 @@ const TablaClasificacion = () => {
 
   // Filtrar los datos por el nombre del usuario
   const filteredRanking = ranking.filter((user) =>
-    user.email.toLowerCase().includes(search.toLowerCase())
+    user.email && user.email.toLowerCase().includes(search.toLowerCase())
   );
+  
 
   const handleSort = (column) => {
     // Determinamos la dirección del orden, alternando entre ascendente y descendente
@@ -107,7 +108,7 @@ const TablaClasificacion = () => {
         </div>
       </section>
       <h1 style={{ fontSize: "2.5rem", marginBottom: "20px", color: "#ff0004" }}>Tabla de Puntajes</h1>
-      <p style={{ fontSize: "1.2rem", marginBottom: "30px" }}>Revisa cómo le ha ido a tus compañeros</p>
+      <p style={{ fontSize: "1.2rem", marginBottom: "30px" }}>Revisa cómo le van a los demás</p>
 
       {/* Campo de búsqueda */}
       <input
