@@ -1,28 +1,35 @@
-import React, { useState, useContext } from "react";
+import React, { useState, useContext, useEffect } from "react";
 import { MdOutlineMenu } from "react-icons/md";
-import "./Micro.scss";
 import { SidebarContext } from "../../context/SidebarContext";
-
-// Datos de ejemplo de los microdesafíos disponibles
-const desafios = [
-  { id: 1, title: "Desafío de Programación", description: "Resuelve un problema de codificación en JavaScript.", completed: false },
-  { id: 2, title: "Desafío de Diseño", description: "Diseña una interfaz de usuario para una app de e-commerce.", completed: false },
-  { id: 3, title: "Desafío de UX", description: "Haz un análisis de la experiencia de usuario de una página web.", completed: false },
-  { id: 4, title: "Desafío de Algoritmos", description: "Resuelve un problema de algoritmos con eficiencia en tiempo.", completed: false },
-  { id: 5, title: "Desafío de Front-End", description: "Construye una página web responsiva utilizando HTML, CSS y JavaScript.", completed: false },
-  { id: 6, title: "Desafío de Backend", description: "Desarrolla una API con Node.js.", completed: false },
-  { id: 7, title: "Desafío de Git", description: "Realiza un pull request con cambios en un repositorio de GitHub.", completed: false },
-  { id: 8, title: "Desafío de Testing", description: "Escribe pruebas unitarias para una función de JavaScript.", completed: false },
-  { id: 9, title: "Desafío de Seguridad", description: "Implementa medidas básicas de seguridad en una app web.", completed: false },
-  { id: 10, title: "Desafío de Optimización", description: "Mejora el rendimiento de una página web.", completed: false },
-];
+import { supabase2 } from "../../supabase/supabase"; // Asegúrate de que está configurado correctamente
+import "./Micro.scss";
 
 const Micro = () => {
   const { openSidebar } = useContext(SidebarContext);
-  const [challenges, setChallenges] = useState(desafios);
+  const [challenges, setChallenges] = useState([]);
   const [completedFilter, setCompletedFilter] = useState("all");
   const [currentPage, setCurrentPage] = useState(1);
   const challengesPerPage = 3; // Número de desafíos por página
+
+  // Obtener los microdesafíos desde Supabase
+  useEffect(() => {
+    const fetchChallenges = async () => {
+      try {
+        const { data, error } = await supabase2
+          .from("microdesafios")
+          .select("*")
+          .order("created_at", { ascending: false });
+
+        if (error) throw error;
+
+        setChallenges(data);
+      } catch (err) {
+        console.error("Error fetching challenges:", err);
+      }
+    };
+
+    fetchChallenges();
+  }, []);
 
   // Filtrar los desafíos según el estado (pendientes, completados o todos)
   const filteredChallenges = challenges.filter((challenge) => {
@@ -35,10 +42,26 @@ const Micro = () => {
   const startIndex = (currentPage - 1) * challengesPerPage;
   const paginatedChallenges = filteredChallenges.slice(startIndex, startIndex + challengesPerPage);
 
-  const handleComplete = (id) => {
-    setChallenges(challenges.map((challenge) =>
-      challenge.id === id ? { ...challenge, completed: true } : challenge
-    ));
+  const handleComplete = async (id) => {
+    try {
+      // Actualizar la base de datos
+      const { data, error } = await supabase2
+        .from("microdesafios")
+        .update({ completed: true })
+        .eq("id", id)
+        .single(); // Obtiene solo el desafío actualizado
+
+      if (error) throw error;
+
+      // Actualizar el estado localmente para reflejar el cambio
+      setChallenges((prev) =>
+        prev.map((challenge) =>
+          challenge.id === id ? { ...challenge, completed: true } : challenge
+        )
+      );
+    } catch (err) {
+      console.error("Error marking as complete:", err);
+    }
   };
 
   const handlePageChange = (pageNumber) => {

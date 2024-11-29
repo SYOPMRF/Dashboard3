@@ -100,7 +100,7 @@ const Sidebar = () => {
                 <span className="menu-link-icon">
                   <MdOutlineAttachMoney size={20} />
                 </span>
-                <span className="menu-link-text">Tabla de Clasificación</span>
+                <span className="menu-link-text">Tabla de Puntajes</span>
               </Link>
             </li>
             <li className="menu-item">

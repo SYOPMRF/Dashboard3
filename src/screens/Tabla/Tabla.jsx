@@ -2,20 +2,19 @@ import React, { useState, useEffect, useContext } from "react";
 import "./Tabla.scss";
 import { MdOutlineMenu } from "react-icons/md";
 import { SidebarContext } from "../../context/SidebarContext";
-import { supabase } from "../../supabase/supabase";  // Asegúrate de importar el cliente
+import { supabase2 } from "../../supabase/supabase";  // Asegúrate de importar el cliente
 
 // Función para descargar la tabla como CSV
 const downloadCSV = (data) => {
   const csvRows = [];
-  const headers = ["Posición", "Usuario", "Nivel", "Puntos"];
+  const headers = ["Posición", "Usuario", "Puntos"];
   csvRows.push(headers.join(","));
 
   data.forEach((user, index) => {
     const row = [
       index + 1 === 1 ? "🥇" : index + 1 === 2 ? "🥈" : index + 1 === 3 ? "🥉" : index + 1,
-      user.name,
-      user.level,
-      user.points,
+      user.email,   // Asegúrate de usar user.email si es el campo correcto
+      user.score || 0,  // Si no existe un campo 'score', establece un valor por defecto
     ];
     csvRows.push(row.join(","));
   });
@@ -28,21 +27,21 @@ const downloadCSV = (data) => {
   link.click();
 };
 
+
 const TablaClasificacion = () => {
   const { openSidebar } = useContext(SidebarContext);
   const [ranking, setRanking] = useState([]); // Estado para almacenar los datos de Supabase
   const [search, setSearch] = useState("");
-  const [sortConfig, setSortConfig] = useState({ key: "points", direction: "desc" });
+  const [sortConfig, setSortConfig] = useState({ key: "score", direction: "desc" });
   const [error, setError] = useState(null);
 
-  
   // Usar useEffect para cargar los datos desde Supabase cuando el componente se monta
   useEffect(() => {
     const fetchRanking = async () => {
-      const { data, error } = await supabase
-        .from('ranking')  // Nombre de la tabla en Supabase
+      const { data, error } = await supabase2
+        .from('user_game_progress')  // Nombre de la tabla en Supabase
         .select('*')
-        .order('points', { ascending: false });  // Ordenar por puntos (descendente)
+        .order('score', { ascending: false });  // Ordenar por puntos (descendente)
       
       if (error) {
         console.error('Error fetching ranking:', error.message);
@@ -58,22 +57,32 @@ const TablaClasificacion = () => {
 
   // Filtrar los datos por el nombre del usuario
   const filteredRanking = ranking.filter((user) =>
-    user.name.toLowerCase().includes(search.toLowerCase())
+    user.email.toLowerCase().includes(search.toLowerCase())
   );
 
-  // Función para ordenar la tabla por columna
   const handleSort = (column) => {
+    // Determinamos la dirección del orden, alternando entre ascendente y descendente
     const direction = sortConfig.key === column && sortConfig.direction === "asc" ? "desc" : "asc";
     setSortConfig({ key: column, direction });
-
-    const sortedData = [...filteredRanking].sort((a, b) => {
-      if (a[column] < b[column]) return direction === "asc" ? -1 : 1;
-      if (a[column] > b[column]) return direction === "asc" ? 1 : -1;
+  
+    // Ordenamos la data basándonos en la columna seleccionada
+    const sortedData = [...ranking].sort((a, b) => {
+      if (column === "name") {
+        // Para ordenar alfabéticamente por nombre de usuario
+        if (a[column].toLowerCase() < b[column].toLowerCase()) return direction === "asc" ? -1 : 1;
+        if (a[column].toLowerCase() > b[column].toLowerCase()) return direction === "asc" ? 1 : -1;
+      } else {
+        // Para las otras columnas, como "score"
+        if (a[column] < b[column]) return direction === "asc" ? -1 : 1;
+        if (a[column] > b[column]) return direction === "asc" ? 1 : -1;
+      }
       return 0;
     });
-
+  
+    // Actualizamos el estado con los datos ordenados
     setRanking(sortedData);
   };
+  
 
   if (error) {
     return (
@@ -97,8 +106,8 @@ const TablaClasificacion = () => {
             </button>
         </div>
       </section>
-      <h1 style={{ fontSize: "2.5rem", marginBottom: "20px", color: "#ff0004" }}>Tabla de Clasificación</h1>
-      <p style={{ fontSize: "1.2rem", marginBottom: "30px" }}>Revisa quién lidera la competencia.</p>
+      <h1 style={{ fontSize: "2.5rem", marginBottom: "20px", color: "#ff0004" }}>Tabla de Puntajes</h1>
+      <p style={{ fontSize: "1.2rem", marginBottom: "30px" }}>Revisa cómo le ha ido a tus compañeros</p>
 
       {/* Campo de búsqueda */}
       <input
@@ -137,7 +146,7 @@ const TablaClasificacion = () => {
 
       {/* Botón para ordenar por puntos */}
       <button
-        onClick={() => handleSort("points")}
+        onClick={() => handleSort("score")}
         style={{
           padding: "10px 20px",
           fontSize: "16px",
@@ -176,13 +185,7 @@ const TablaClasificacion = () => {
               Usuario
             </th>
             <th
-              onClick={() => handleSort("level")}
-              style={tableHeaderStyle}
-            >
-              Nivel
-            </th>
-            <th
-              onClick={() => handleSort("points")}
+              onClick={() => handleSort("score")}
               style={tableHeaderStyle}
             >
               Puntos
@@ -200,9 +203,8 @@ const TablaClasificacion = () => {
               <td style={tableCellStyle}>
                 {index + 1 === 1 ? "🥇" : index + 1 === 2 ? "🥈" : index + 1 === 3 ? "🥉" : index + 1}
               </td>
-              <td style={tableCellStyle}>{user.name}</td>
-              <td style={tableCellStyle}>{user.level}</td>
-              <td style={tableCellStyle}>{user.points}</td>
+              <td style={tableCellStyle}>{user.email}</td>
+              <td style={tableCellStyle}>{user.score}</td>
             </tr>
           ))}
         </tbody>

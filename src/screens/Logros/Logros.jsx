@@ -7,44 +7,43 @@ import "./Logros.scss";
 import "jspdf-autotable";
 
 const Logros = () => {
-
   const { openSidebar } = useContext(SidebarContext);
 
   const [badges, setBadges] = useState([
     {
-      id: 12,
+      user_id: "a0cc675b-974a-4cd7-8347-f0987113f908",
       title: "Primer Logro",
       description: "Completaste tu primer tarea.",
       imageUrl: "https://cdn-icons-png.flaticon.com/512/771/771222.png",
-      score: 0, // Puntuación inicial por defecto
+      scores: [], // Lista de puntajes
     },
     {
-      id: 2,
+      user_id: "a0cc675b-974a-4cd7-8347-f0987113f908",
       title: "Explorador",
       description: "Visitaste todas las secciones.",
       imageUrl: "https://cdn-icons-png.flaticon.com/512/771/771222.png",
-      score: 0,
+      scores: [],
     },
     {
-      id: 3,
+      user_id: "a0cc675b-974a-4cd7-8347-f0987113f908",
       title: "Maestro del Tiempo",
       description: "Lograste completar una tarea antes de tiempo.",
       imageUrl: "https://cdn-icons-png.flaticon.com/512/771/771222.png",
-      score: 0,
+      scores: [],
     },
     {
-      id: 4,
+      user_id: "a0cc675b-974a-4cd7-8347-f0987113f908",
       title: "Maestro del agua",
       description: "Aprendiste el ciclo del agua.",
       imageUrl: "https://cdn-icons-png.flaticon.com/512/771/771222.png",
-      score: 0,
+      scores: [],
     },
     {
-      id: 5,
+      user_id: "a0cc675b-974a-4cd7-8347-f0987113f908",
       title: "Nivel 10 Alcanzado",
       description: "Subiste al nivel 10.",
       imageUrl: "https://cdn-icons-png.flaticon.com/512/771/771222.png",
-      score: 0,
+      scores: [],
     },
   ]);
 
@@ -53,9 +52,11 @@ const Logros = () => {
   // Función para obtener los scores del backend
   const fetchScores = async () => {
     setLoading(true);
-    const response = await supabase2.from("user_game_progress").select("id, score");
+    const response = await supabase2
+      .from("user_game_progress")
+      .select("user_id, score, created_at") // Obtener también created_at
+      .order("created_at", { ascending: false }); // Ordenar por created_at en orden descendente
   
-    // Verificar que la respuesta no es undefined o nula
     if (!response || response.error) {
       console.error("Error al obtener los scores:", response?.error?.message);
       alert("No se pudieron obtener los puntajes. Intenta de nuevo.");
@@ -63,7 +64,6 @@ const Logros = () => {
       return; // Detener ejecución si hay error
     }
   
-    // Si todo es correcto, desestructuramos la respuesta
     const { data } = response;
   
     // Validar si 'data' es un arreglo y tiene los datos esperados
@@ -72,20 +72,23 @@ const Logros = () => {
       setLoading(false);
       return;
     }
-  
+
     // Mapear los scores a las insignias correspondientes
     const updatedBadges = badges.map((badge) => {
-      const matchingScore = data.find((scoreData) => scoreData.id === badge.id);
+      // Filtrar los puntajes del usuario correspondiente y ordenar por created_at
+      const userScores = data
+        .filter((scoreData) => scoreData.user_id === badge.user_id)
+        .slice(0, 5); // Tomar solo los primeros 5 más recientes
+
       return {
         ...badge,
-        score: matchingScore ? matchingScore.score : 0, // Asignar el score o dejar 0 si no hay coincidencia
+        scores: userScores.map((scoreData) => scoreData.score), // Asignar los 5 puntajes más recientes
       };
     });
   
     setBadges(updatedBadges);
     setLoading(false);
   };
-  
 
   // Función para descargar como PDF
   const handleDownloadPDF = () => {
@@ -96,11 +99,11 @@ const Logros = () => {
     const tableData = badges.map((badge) => [
       badge.title,
       badge.description,
-      badge.score,
+      badge.scores.join(", "), // Mostrar los 5 puntajes más recientes en el PDF
     ]);
 
     doc.autoTable({
-      head: [["Título", "Descripción", "Puntuación"]],
+      head: [["Título", "Descripción", "Puntajes más recientes"]],
       body: tableData,
       startY: 20,
     });
@@ -171,7 +174,9 @@ const Logros = () => {
               {badge.description}
             </p>
             <p style={{ fontSize: "1.2rem", color: "#007bff" }}>
-              Puntuación: {badge.score}
+              {badge.scores.length > 0
+                ? `Últimos puntajes: ${badge.scores.join(", ")}`
+                : "No hay puntajes disponibles"}
             </p>
           </div>
         ))}
