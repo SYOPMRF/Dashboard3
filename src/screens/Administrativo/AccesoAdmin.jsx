@@ -1,11 +1,10 @@
 import React, { useState } from "react";
 import "./AccesoAdmin.scss";
 import { db } from "../../firebase/firebase";
-import { collection, query, where, getDocs } from "firebase/firestore";
+import { collection, query, where, getDocs, updateDoc, doc } from "firebase/firestore";
 
 // Si deseas usar un icono de FontAwesome, asegúrate de tenerlo instalado:
 // npm install react-icons
-
 import { FaEye, FaEyeSlash } from "react-icons/fa"; // Iconos de FontAwesome
 
 function AccesoAdmin() {
@@ -13,9 +12,11 @@ function AccesoAdmin() {
     adminEmail: "",
     adminPassword: "",
     adminCode: "",
+    recoveryEmail: "", // Para el correo de recuperación
   });
-  
+
   const [passwordVisible, setPasswordVisible] = useState(false); // Estado para mostrar/ocultar la contraseña
+  const [isRecovery, setIsRecovery] = useState(false); // Estado para ver si el usuario está en la vista de recuperación
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -25,16 +26,32 @@ function AccesoAdmin() {
   const handleAdminAccess = async (e) => {
     e.preventDefault();
     try {
+      // Validar que el correo tenga el dominio gmail.com
+      const emailPattern = /^[a-zA-Z0-9._%+-]+@gmail\.com$/;
+      if (!emailPattern.test(formData.adminEmail)) {
+        alert("Por favor ingresa un correo válido de Gmail.");
+        return;
+      }
+
+      // Buscar el usuario con el correo y código de administrador
       const q = query(
         collection(db, "registro"),
-        where("adminCode", "==", parseInt(formData.adminCode, 10)),
+        where("adminCode", "==", formData.adminCode),
         where("adminEmail", "==", formData.adminEmail),
         where("adminPassword", "==", formData.adminPassword)
       );
       const querySnapshot = await getDocs(q);
+
       if (!querySnapshot.empty) {
-        const userDoc = querySnapshot.docs[0].data();
-        if (userDoc.is_Admin) {
+        const userDoc = querySnapshot.docs[0];
+        const userData = userDoc.data();
+
+        // Verificar si el usuario tiene permisos de administrador
+        if (userData.is_Admin) {
+          // Actualizar el campo "online" del usuario a true
+          await updateDoc(doc(db, "registro", userDoc.id), {
+            online: true,
+          });
           alert("Acceso administrativo concedido");
         } else {
           alert("No tienes permisos administrativos");
@@ -51,6 +68,40 @@ function AccesoAdmin() {
   // Función para alternar la visibilidad de la contraseña
   const togglePasswordVisibility = () => {
     setPasswordVisible(!passwordVisible);
+  };
+
+  const handlePasswordRecovery = async (e) => {
+    e.preventDefault();
+    try {
+      // Validar que el correo tenga el dominio gmail.com
+      const emailPattern = /^[a-zA-Z0-9._%+-]+@gmail\.com$/;
+      if (!emailPattern.test(formData.recoveryEmail)) {
+        alert("Por favor ingresa un correo válido de Gmail.");
+        return;
+      }
+
+      // Buscar el correo en Firestore
+      const q = query(
+        collection(db, "registro"),
+        where("recoveryEmail", "==", formData.recoveryEmail)
+
+      );
+      const querySnapshot = await getDocs(q);
+
+      if (!querySnapshot.empty) {
+        const userDoc = querySnapshot.docs[0];
+        const userData = userDoc.data();
+
+        // Recuperar la contraseña y enviarla (en este caso solo la mostramos)
+        alert(`La contraseña es: ${userData.adminPassword}`);
+
+      } else {
+        alert("Correo no encontrado en la base de datos.");
+      }
+    } catch (error) {
+      console.error("Error al recuperar la contraseña: ", error);
+      alert("Ocurrió un error al intentar recuperar la contraseña.");
+    }
   };
 
   return (
@@ -95,6 +146,32 @@ function AccesoAdmin() {
           
           <button type="submit">Acceder</button>
         </form>
+
+        {/* Botón "Olvidaste tu contraseña" */}
+        <button className="auth-button" onClick={() => setIsRecovery(true)}>
+          Olvidaste tu contraseña
+        </button>
+
+        {/* Recuperación de contraseña */}
+        {isRecovery && (
+          <form onSubmit={handlePasswordRecovery}>
+            <input
+              type="email"
+              name="recoveryEmail"
+              placeholder="Ingresa tu correo"
+              value={formData.recoveryEmail}
+              onChange={handleChange}
+              required
+            />
+            <button type="submit">Recuperar contraseña</button>
+          </form>
+        )}
+
+        {/* Botones para volver al registro o iniciar sesión */}
+        <div className="auth-options">
+          <button className="auth-button" onClick={() => window.location.href = "/"}>Volver al registro</button>
+          <button className="auth-button" onClick={() => window.location.href = "/login"}>Iniciar sesión</button>
+        </div>
       </div>
     </div>
   );
