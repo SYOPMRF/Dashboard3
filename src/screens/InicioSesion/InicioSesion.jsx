@@ -72,10 +72,8 @@ function InicioSesion() {
         const userDoc = querySnapshot.docs[0].data();
         const password = userDoc.contraseña; // Obtener la contraseña cifrada desde la base de datos
 
-        // Aquí deberías enviar el correo usando una API como EmailJS
-        // EmailJS.send('service_id', 'template_id', { user_email: recoveryEmail, password: password });
-
-        alert("Te hemos enviado un correo con tu contraseña. (Simulado)");
+        // Recuperar la contraseña y enviarla (en este caso solo la mostramos)
+        alert(`La contraseña es: ${userDoc.contraseña}`);
 
         // Actualiza el estado para notificar al usuario
         setRecoveryStatus("Correo enviado correctamente.");

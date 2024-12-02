@@ -98,7 +98,7 @@ const Sidebar = () => {
         <div className="sidebar-menu">
           <ul className="menu-list">
             <li className="menu-item">
-            <Link to="/dashboard" className={`menu-link ${activeLink === "/" ? "active" : ""}`} onClick={() => setActiveLink("/")}>
+            <Link to="/dashboard" className={`menu-link ${activeLink === "/dashboard" ? "active" : ""}`} onClick={() => setActiveLink("/dashboard")}>
               <span className="menu-link-icon">
                 <MdOutlineGridView size={18} />
               </span>
