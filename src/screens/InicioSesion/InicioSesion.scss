@@ -1,0 +1,97 @@
+.inicio-sesion-container {
+    display: flex;
+    height: 100vh;
+  
+    .image-section {
+      flex: 1;
+      background-color: #ff4d4f;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      img {
+        max-width: 90%;
+        height: auto;
+        border-radius: 10px;
+      }
+    }
+  
+    .form-section {
+      flex: 1;
+      background-color: #ffffff;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 2rem;
+  
+      h1 {
+        font-size: 2.5rem;
+        color: #ff4d4f;
+        margin-bottom: 1rem;
+      }
+  
+      p {
+        font-size: 1.2rem;
+        margin-bottom: 1.5rem;
+        color: #333333;
+      }
+  
+      form {
+        display: flex;
+        flex-direction: column;
+  
+        input {
+          padding: 0.8rem;
+          margin-bottom: 1rem;
+          border: 1px solid #dddddd;
+          border-radius: 5px;
+          font-size: 1rem;
+  
+          &:focus {
+            border-color: #ff4d4f;
+            outline: none;
+            box-shadow: 0 0 5px rgba(255, 77, 79, 0.5);
+          }
+        }
+  
+        button[type="submit"] {
+          padding: 0.8rem;
+          background-color: #ff4d4f;
+          color: #ffffff;
+          font-size: 1.1rem;
+          border: none;
+          border-radius: 5px;
+          cursor: pointer;
+          transition: background-color 0.3s;
+  
+          &:hover {
+            background-color: #e43c3e;
+          }
+        }
+      }
+  
+      .button-group {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 1.5rem;
+  
+        button {
+          flex: 1;
+          padding: 0.8rem;
+          margin: 0 0.5rem;
+          background-color: #ffffff;
+          color: #ff4d4f;
+          font-size: 1.1rem;
+          border: 2px solid #ff4d4f;
+          border-radius: 5px;
+          cursor: pointer;
+          transition: background-color 0.3s, color 0.3s;
+  
+          &:hover {
+            background-color: #ff4d4f;
+            color: #ffffff;
+          }
+        }
+      }
+    }
+  }
+  

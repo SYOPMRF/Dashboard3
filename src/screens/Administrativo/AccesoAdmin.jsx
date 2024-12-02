@@ -1,7 +1,7 @@
 // AccesoAdmin.jsx
 import React, { useState } from "react";
 import "./AccesoAdmin.scss";
-import { db } from "./firebaseConfig";
+import { db } from "../../firebase/firebase";
 import { collection, query, where, getDocs } from "firebase/firestore";
 
 function AccesoAdmin() {
@@ -37,7 +37,7 @@ function AccesoAdmin() {
   return (
     <div className="admin-container">
       <div className="image-section">
-        <img src="/path/to/your/image.jpg" alt="Acceso administrativo" />
+        <img src="https://cdn.pixabay.com/photo/2022/11/02/18/06/webcam-7565723_1280.png" alt="Acceso administrativo" />
       </div>
       <div className="form-section">
         <h1>Acceso administrativo</h1>

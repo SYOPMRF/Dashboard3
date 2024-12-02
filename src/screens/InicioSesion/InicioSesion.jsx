@@ -1,7 +1,7 @@
 // InicioSesion.jsx
 import React, { useState } from "react";
-import "./InicioSesion.scss";
-import { db } from "./firebaseConfig";
+import "./InicioSesion.scss"
+import { db } from "../../firebase/firebase";
 import { collection, query, where, getDocs, doc, updateDoc } from "firebase/firestore";
 
 function InicioSesion() {
@@ -21,7 +21,7 @@ function InicioSesion() {
       const q = query(
         collection(db, "registro"),
         where("email", "==", formData.email),
-        where("password", "==", formData.password) // En producción, evita guardar contraseñas sin cifrar.
+        where("contraseña", "==", formData.password) // En producción, evita guardar contraseñas sin cifrar.
       );
       const querySnapshot = await getDocs(q);
       if (!querySnapshot.empty) {
@@ -39,7 +39,7 @@ function InicioSesion() {
   return (
     <div className="inicio-sesion-container">
       <div className="image-section">
-        <img src="/path/to/your/image.jpg" alt="Plataforma de aprendizaje" />
+        <img src="https://cdn.pixabay.com/photo/2022/11/02/18/06/webcam-7565723_1280.png" alt="Plataforma de aprendizaje" />
       </div>
       <div className="form-section">
         <h1>Canvis</h1>
@@ -64,7 +64,7 @@ function InicioSesion() {
           <button type="submit">Iniciar sesión</button>
         </form>
         <div className="button-group">
-          <button onClick={() => (window.location.href = "/registro")}>Registrarse</button>
+          <button onClick={() => (window.location.href = "/")}>Registrarse</button>
           <button onClick={() => (window.location.href = "/admin")}>Acceso administrativo</button>
         </div>
       </div>

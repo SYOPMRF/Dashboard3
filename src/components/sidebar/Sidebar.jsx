@@ -80,7 +80,7 @@ const Sidebar = () => {
         <div className="sidebar-menu">
           <ul className="menu-list">
             <li className="menu-item">
-            <Link to="/" className={`menu-link ${activeLink === "/" ? "active" : ""}`} onClick={() => setActiveLink("/")}>
+            <Link to="/dashboard" className={`menu-link ${activeLink === "/" ? "active" : ""}`} onClick={() => setActiveLink("/")}>
               <span className="menu-link-icon">
                 <MdOutlineGridView size={18} />
               </span>
@@ -125,12 +125,12 @@ const Sidebar = () => {
         <div className="sidebar-menu sidebar-menu2">
           <ul className="menu-list">
             <li className="menu-item">
-              <button className="menu-link menu-link-volver" onClick={handleRedirect}>
+            <Link to="/" className={`menu-link ${activeLink === "/" ? "active" : ""}`} onClick={() => setActiveLink("/")}>
                 <span className="menu-link-icon">
                   <MdOutlineLogout size={20} />
                 </span>
-                <span className="menu-link-text">Volver atrás</span>
-              </button>
+                <span className="menu-link-text">Cerrar Sesión</span>
+                </Link>
             </li>
           </ul>
         </div>
