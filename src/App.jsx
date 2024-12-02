@@ -8,6 +8,7 @@ import SunIcon from "./assets/icons/sun.svg";
 import BaseLayout from "./layout/BaseLayout";
 import {Dashboard, Logros, Micro, Notificaciones, PageNotFound, TablaClasificacion} from "./screens";
 import { supabase } from "./supabase/supabase";
+import Registro from "./screens/Registro/Registro";
 
 
 function App() {
@@ -27,8 +28,8 @@ return (
       <Router>
         <Routes>
           <Route element={<BaseLayout />}>
-            <Route path="/" element={<Dashboard />} />
-            <Route path="/logros" element={<Logros />} />
+            <Route path="/" element={<Registro />} />
+            <Route path="/logros" element={<Dashboard />} />
             <Route path="/notificaciones" element={<Notificaciones />} />
             <Route path="/tabla" element={<TablaClasificacion />} />
             <Route path="/desafios" element={<Micro />} />

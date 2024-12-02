@@ -1,47 +1,54 @@
 import { useState, useEffect } from "react";
-import { supabase2 } from "../../../supabase/supabase"; // Asegúrate de importar el cliente de Supabase
+import { db } from "../../../firebase/firebase"; // Asegúrate de importar tu configuración de Firebase
+import { collection, getDocs, query, where } from "firebase/firestore";
 
 const AreaProgressChart = () => {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  // Definir el user_id específico
-  const userId = "a0cc675b-974a-4cd7-8347-f0987113f908"; // Cambia esto por el user_id que desees
-
-  // Función para obtener los datos del backend
   const fetchData = async () => {
     setLoading(true);
+
     try {
-      // Obtenemos los datos de puntajes de usuario ordenados por fecha (los más recientes primero)
-      const response = await supabase2
-        .from("user_game_progress") // Asegúrate de usar la tabla correcta
-        .select("user_id, score, created_at") // Traemos las columnas necesarias
-        .eq("user_id", userId) // Filtramos por el user_id específico
-        .order("created_at", { ascending: false }); // Ordenamos por fecha, de más reciente a más antiguo
+      // 1. Obtener todos los usuarios con `online: true` en la colección `registro`
+      const registroRef = collection(db, "registro");
+      const registroQuery = query(registroRef, where("online", "==", true));
+      const registroSnapshot = await getDocs(registroQuery);
 
-      if (response.error) {
-        throw new Error(response.error.message);
-      }
-
-      const { data: scoresData } = response;
-
-      // Tomamos solo los 5 primeros puntajes más recientes
-      const latestScores = scoresData.slice(0, 5);
-
-      // Si no hay puntajes, mostrar un mensaje apropiado
-      if (latestScores.length === 0) {
+      if (registroSnapshot.empty) {
+        console.log("No hay usuarios online.");
         setData([]);
         setLoading(false);
         return;
       }
 
-      // Encontrar el puntaje máximo (para hacer la barra de progreso)
-      const maxScore = Math.max(...latestScores.map(score => score.score));
+      const emailsOnline = registroSnapshot.docs.map((doc) => doc.data().email);
 
-      // Formatear los puntajes para ser mostrados como porcentaje
-      const formattedData = latestScores.map((scoreData) => ({
-        score: scoreData.score,
-        percentValue: (scoreData.score / maxScore) * 100, // Convertir el puntaje a porcentaje
+      // 2. Buscar en `user_game_progress` los documentos cuyo `email` coincida
+      const gameProgressRef = collection(db, "user_game_progress");
+      const gameProgressQuery = query(gameProgressRef, where("email", "in", emailsOnline)); // Usamos "in" para filtrar múltiples emails
+      const gameProgressSnapshot = await getDocs(gameProgressQuery);
+
+      if (gameProgressSnapshot.empty) {
+        console.log("No hay progresos de juego para los usuarios online.");
+        setData([]);
+        setLoading(false);
+        return;
+      }
+
+      // 3. Extraer los campos necesarios (score)
+      const progressData = gameProgressSnapshot.docs.map((doc) => ({
+        score: doc.data().score,
+      }));
+
+      // 4. Ordenar por puntaje y tomar los primeros 5
+      const sortedData = progressData.sort((a, b) => b.score - a.score).slice(0, 5);
+
+      // Formatear los puntajes para mostrar como porcentaje
+      const maxScore = Math.max(...sortedData.map((item) => item.score));
+      const formattedData = sortedData.map((item) => ({
+        score: item.score,
+        percentValue: (item.score / maxScore) * 100,
       }));
 
       setData(formattedData);
@@ -55,7 +62,7 @@ const AreaProgressChart = () => {
 
   useEffect(() => {
     fetchData();
-  }, []); // Solo se ejecuta una vez cuando el componente se monta
+  }, []); // Se ejecuta una vez al montar el componente
 
   return (
     <div className="progress-bar">
@@ -64,7 +71,7 @@ const AreaProgressChart = () => {
       </div>
       <div className="progress-bar-list">
         {loading ? (
-          <p>Cargando...</p> // Mostrar mensaje de carga si los datos están siendo cargados
+          <p>Cargando...</p>
         ) : (
           data?.map((progressbar, index) => (
             <div className="progress-bar-item" key={index}>
@@ -78,7 +85,7 @@ const AreaProgressChart = () => {
                 <div
                   className="bar-item-filled"
                   style={{
-                    width: `${progressbar.percentValue}%`, // Usamos el porcentaje para el ancho de la barra
+                    width: `${progressbar.percentValue}%`,
                   }}
                 ></div>
               </div>

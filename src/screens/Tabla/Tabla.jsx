@@ -2,97 +2,35 @@ import React, { useState, useEffect, useContext } from "react";
 import "./Tabla.scss";
 import { MdOutlineMenu } from "react-icons/md";
 import { SidebarContext } from "../../context/SidebarContext";
-import { supabase2 } from "../../supabase/supabase";  // Asegúrate de importar el cliente
-
-// Función para descargar la tabla como CSV
-const downloadCSV = (data) => {
-  const csvRows = [];
-  const headers = ["Posición", "Usuario", "Puntos"];
-  csvRows.push(headers.join(","));
-
-  data.forEach((user, index) => {
-    const row = [
-      index + 1 === 1 ? "🥇" : index + 1 === 2 ? "🥈" : index + 1 === 3 ? "🥉" : index + 1,
-      user.email,   // Asegúrate de usar user.email si es el campo correcto
-      user.score || 0,  // Si no existe un campo 'score', establece un valor por defecto
-    ];
-    csvRows.push(row.join(","));
-  });
-
-  const csvData = new Blob([csvRows.join("\n")], { type: "text/csv" });
-  const csvUrl = URL.createObjectURL(csvData);
-  const link = document.createElement("a");
-  link.href = csvUrl;
-  link.download = "tabla_clasificacion.csv";
-  link.click();
-};
-
+import { db, collection, getDocs, query, orderBy } from "../../firebase/firebase";
 
 const TablaClasificacion = () => {
   const { openSidebar } = useContext(SidebarContext);
-  const [ranking, setRanking] = useState([]); // Estado para almacenar los datos de Supabase
+  const [ranking, setRanking] = useState([]); 
   const [search, setSearch] = useState("");
-  const [sortConfig, setSortConfig] = useState({ key: "score", direction: "desc" });
   const [error, setError] = useState(null);
 
-  // Usar useEffect para cargar los datos desde Supabase cuando el componente se monta
   useEffect(() => {
     const fetchRanking = async () => {
-      const { data, error } = await supabase2
-        .from('user_game_progress')  // Nombre de la tabla en Supabase
-        .select('*')
-        .order('score', { ascending: false });  // Ordenar por puntos (descendente)
-      
-      if (error) {
-        console.error('Error fetching ranking:', error.message);
+      try {
+        const q = query(collection(db, "user_game_progress"), orderBy("score", "desc"));
+        const querySnapshot = await getDocs(q);
+        const data = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        setRanking(data);
+      } catch (err) {
+        console.error("Error fetching ranking:", err.message);
         setError("No se pudo cargar la tabla. Por favor, inténtalo más tarde.");
         alert("No se pudieron obtener los valores. Intenta de nuevo.");
-      } else {
-        setRanking(data);  // Establecer los datos en el estado
       }
     };
 
     fetchRanking();
-  }, []);  // Solo se ejecuta una vez al montar el componente
+  }, []);
 
-  // Filtrar los datos por el nombre del usuario
-  const filteredRanking = ranking.filter((user) =>
+  const filteredRanking = ranking.filter(user =>
     user.email && user.email.toLowerCase().includes(search.toLowerCase())
   );
-  
 
-  const handleSort = (column) => {
-    // Determinamos la dirección del orden, alternando entre ascendente y descendente
-    const direction = sortConfig.key === column && sortConfig.direction === "asc" ? "desc" : "asc";
-    setSortConfig({ key: column, direction });
-  
-    // Ordenamos la data basándonos en la columna seleccionada
-    const sortedData = [...ranking].sort((a, b) => {
-      if (column === "name") {
-        // Para ordenar alfabéticamente por nombre de usuario
-        if (a[column].toLowerCase() < b[column].toLowerCase()) return direction === "asc" ? -1 : 1;
-        if (a[column].toLowerCase() > b[column].toLowerCase()) return direction === "asc" ? 1 : -1;
-      } else {
-        // Para las otras columnas, como "score"
-        if (a[column] < b[column]) return direction === "asc" ? -1 : 1;
-        if (a[column] > b[column]) return direction === "asc" ? 1 : -1;
-      }
-      return 0;
-    });
-  
-    // Actualizamos el estado con los datos ordenados
-    setRanking(sortedData);
-  };
-  
-
-  if (error) {
-    return (
-      <div style={{ padding: "20px", textAlign: "center", color: "#ff0004" }}>
-        <h1>Error</h1>
-        <p>{error}</p>
-      </div>
-    );
-  }
 
   return (
     <div style={{ padding: "20px", textAlign: "center" }}>
