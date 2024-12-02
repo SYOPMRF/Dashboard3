@@ -20,12 +20,10 @@ import { Link } from "react-router-dom";
 import "./Sidebar.scss";
 import { SidebarContext } from "../../context/SidebarContext";
 
+import { db } from "../../firebase/firebase";
+import { collection, query, where, getDocs, updateDoc, doc } from "firebase/firestore";
+
 const Sidebar = () => {
-  const handleRedirect = () => {
-    // URL del proyecto en Vercel que contiene el formulario
-    const url = 'https://proyecto-web-umber.vercel.app/';
-    window.location.href = url;
-  };
   
   const { theme } = useContext(ThemeContext);
   const { isSidebarOpen, closeSidebar } = useContext(SidebarContext);
@@ -41,6 +39,30 @@ const Sidebar = () => {
       event.target.className !== "sidebar-oepn-btn"
     ) {
       closeSidebar();
+    }
+  };
+
+  const handleLogout = async () => {
+    try {
+      // Crear una consulta para buscar al usuario con `online: true`
+      const q = query(collection(db, "registro"), where("online", "==", true));
+      const querySnapshot = await getDocs(q);
+
+      if (!querySnapshot.empty) {
+        // Si se encuentra el usuario, actualiza el campo `online` a `false`
+        const userDoc = querySnapshot.docs[0]; // Suponiendo que solo hay un usuario online
+        const userRef = doc(db, "registro", userDoc.id);
+        await updateDoc(userRef, { online: false });
+
+        console.log("Estado actualizado a offline.");
+      } else {
+        console.log("No se encontraron usuarios online.");
+      }
+
+      // Redirigir al usuario después de cerrar sesión
+      handleRedirect();
+    } catch (error) {
+      console.error("Error al cerrar sesión:", error);
     }
   };
 
@@ -63,13 +85,9 @@ const Sidebar = () => {
     >
       <div className="sidebar-top">
         <div className="sidebar-brand">
-        <button onClick={handleRedirect}>
           <img src={theme === LIGHT_THEME ? LogoBlue : LogoWhite} alt="" />
-        </button>
           <span>
-            <button className="sidebar-brand-text" onClick={handleRedirect}>
             Canvis
-            </button>
           </span>
         </div>
         <button className="sidebar-close-btn" onClick={closeSidebar} aria-label="Cerrar barra lateral">
@@ -125,12 +143,14 @@ const Sidebar = () => {
         <div className="sidebar-menu sidebar-menu2">
           <ul className="menu-list">
             <li className="menu-item">
+            <button className="menu-link" onClick={handleLogout}>
             <Link to="/" className={`menu-link ${activeLink === "/" ? "active" : ""}`} onClick={() => setActiveLink("/")}>
                 <span className="menu-link-icon">
                   <MdOutlineLogout size={20} />
                 </span>
                 <span className="menu-link-text">Cerrar Sesión</span>
                 </Link>
+              </button>
             </li>
           </ul>
         </div>

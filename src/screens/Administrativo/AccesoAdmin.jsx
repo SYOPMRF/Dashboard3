@@ -1,8 +1,12 @@
-// AccesoAdmin.jsx
 import React, { useState } from "react";
 import "./AccesoAdmin.scss";
 import { db } from "../../firebase/firebase";
 import { collection, query, where, getDocs } from "firebase/firestore";
+
+// Si deseas usar un icono de FontAwesome, asegúrate de tenerlo instalado:
+// npm install react-icons
+
+import { FaEye, FaEyeSlash } from "react-icons/fa"; // Iconos de FontAwesome
 
 function AccesoAdmin() {
   const [formData, setFormData] = useState({
@@ -10,6 +14,8 @@ function AccesoAdmin() {
     adminPassword: "",
     adminCode: "",
   });
+  
+  const [passwordVisible, setPasswordVisible] = useState(false); // Estado para mostrar/ocultar la contraseña
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -21,17 +27,30 @@ function AccesoAdmin() {
     try {
       const q = query(
         collection(db, "registro"),
-        where("adminCode", "==", formData.adminCode)
+        where("adminCode", "==", parseInt(formData.adminCode, 10)),
+        where("adminEmail", "==", formData.adminEmail),
+        where("adminPassword", "==", formData.adminPassword)
       );
       const querySnapshot = await getDocs(q);
       if (!querySnapshot.empty) {
-        alert("Acceso administrativo concedido");
+        const userDoc = querySnapshot.docs[0].data();
+        if (userDoc.is_Admin) {
+          alert("Acceso administrativo concedido");
+        } else {
+          alert("No tienes permisos administrativos");
+        }
       } else {
-        alert("Código de administrador incorrecto");
+        alert("Datos de acceso incorrectos");
       }
     } catch (error) {
       console.error("Error en acceso administrativo: ", error);
+      alert("Ocurrió un error al intentar acceder.");
     }
+  };
+
+  // Función para alternar la visibilidad de la contraseña
+  const togglePasswordVisibility = () => {
+    setPasswordVisible(!passwordVisible);
   };
 
   return (
@@ -50,14 +69,21 @@ function AccesoAdmin() {
             onChange={handleChange}
             required
           />
-          <input
-            type="password"
-            name="adminPassword"
-            placeholder="Contraseña"
-            value={formData.adminPassword}
-            onChange={handleChange}
-            required
-          />
+          
+          <div className="password-input-container">
+            <input
+              type={passwordVisible ? "text" : "password"} // Cambia entre texto claro y cifrado
+              name="adminPassword"
+              placeholder="Contraseña"
+              value={formData.adminPassword}
+              onChange={handleChange}
+              required
+            />
+            <button type="button" className="password-toggle" onClick={togglePasswordVisibility}>
+              {passwordVisible ? <FaEyeSlash /> : <FaEye />} {/* Muestra icono de ojo según el estado */}
+            </button>
+          </div>
+
           <input
             type="text"
             name="adminCode"
@@ -66,6 +92,7 @@ function AccesoAdmin() {
             onChange={handleChange}
             required
           />
+          
           <button type="submit">Acceder</button>
         </form>
       </div>

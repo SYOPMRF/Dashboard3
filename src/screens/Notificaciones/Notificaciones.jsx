@@ -1,7 +1,9 @@
 import { useState, useEffect, useContext } from "react";
 import { MdOutlineMenu } from "react-icons/md";
 import { SidebarContext } from "../../context/SidebarContext";
-import { supabase2 } from "../../supabase/supabase";  // Asegúrate de que está configurado correctamente
+import { db } from "../../firebase/firebase"; // Configuración de Firebase Firestore
+import { collection, query, orderBy, getDocs, doc, updateDoc } from "firebase/firestore";
+import { format } from "date-fns"; // Librería para formatear fechas
 import "./Notificaciones.scss";
 
 const Notificaciones = () => {
@@ -9,17 +11,20 @@ const Notificaciones = () => {
   const [notifications, setNotifications] = useState([]);
   const [error, setError] = useState(null);
 
-  // Obtener las notificaciones desde Supabase
+  // Obtener notificaciones desde Firestore
   useEffect(() => {
     const fetchNotifications = async () => {
       try {
-        const { data, error } = await supabase2
-          .from("notificaciones")
-          .select("id, title, message, is_read")
-          .order("created_at", { ascending: false });
-
-        if (error) throw error;
-        setNotifications(data);
+        const q = query(
+          collection(db, "notificaciones"),
+          orderBy("created_at", "desc")
+        );
+        const querySnapshot = await getDocs(q);
+        const fetchedNotifications = querySnapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+        setNotifications(fetchedNotifications);
       } catch (err) {
         console.error("Error fetching notifications:", err);
         setError("No se pudo cargar las notificaciones.");
@@ -32,13 +37,8 @@ const Notificaciones = () => {
   // Marcar una notificación como leída
   const markAsRead = async (id) => {
     try {
-      const { error } = await supabase2
-        .from("notificaciones")
-        .update({ is_read: true })
-        .eq("id", id);
-
-      if (error) throw error;
-
+      const notifRef = doc(db, "notificaciones", id);
+      await updateDoc(notifRef, { is_read: true });
       setNotifications((prev) =>
         prev.map((notif) =>
           notif.id === id ? { ...notif, is_read: true } : notif
@@ -49,44 +49,39 @@ const Notificaciones = () => {
     }
   };
 
-  // Eliminar una notificación
+  // Eliminar una notificación (actualiza el campo is_visible a false)
   const deleteNotification = async (id) => {
     try {
-      const { error } = await supabase2
-        .from("notificaciones")
-        .delete()
-        .eq("id", id);
-
-      if (error) throw error;
-
+      const notifRef = doc(db, "notificaciones", id);
+      await updateDoc(notifRef, { is_visible: false });
       setNotifications((prev) => prev.filter((notif) => notif.id !== id));
     } catch (err) {
       console.error("Error deleting notification:", err);
     }
   };
 
-  // Marcar todas como leídas (usando la misma lógica que para marcar una como leída)
+  // Marcar todas como leídas
   const markAllAsRead = async () => {
     try {
-      // Recorremos todas las notificaciones para actualizarlas
       for (let notif of notifications) {
         if (!notif.is_read) {
-          const { error } = await supabase2
-            .from("notificaciones")
-            .update({ is_read: true })
-            .eq("id", notif.id);
-
-          if (error) throw error;
+          const notifRef = doc(db, "notificaciones", notif.id);
+          await updateDoc(notifRef, { is_read: true });
         }
       }
-
-      // Después de actualizar todas, reflejamos el cambio en el estado local
       setNotifications((prev) =>
         prev.map((notif) => ({ ...notif, is_read: true }))
       );
     } catch (err) {
       console.error("Error marking all as read:", err);
     }
+  };
+
+  // Formatear la fecha para mostrarla
+  const formatDate = (timestamp) => {
+    if (!timestamp) return "Sin fecha";
+    const date = timestamp.toDate(); // Convertir el timestamp de Firestore a un objeto Date
+    return format(date, "dd/MM/yyyy HH:mm"); // Formato: día/mes/año hora:minuto
   };
 
   if (error) {
@@ -150,78 +145,82 @@ const Notificaciones = () => {
         </button>
       </div>
 
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          gap: "15px",
-        }}
-      >
+      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "15px" }}>
         {notifications.length > 0 ? (
-          notifications.map((notif) => (
-            <div
-              key={notif.id}
-              style={{
-                width: "90%",
-                maxWidth: "400px",
-                border: "1px solid #ccc",
-                borderRadius: "10px",
-                padding: "15px",
-                backgroundColor: notif.is_read ? "#fff" : "#f0f0f0",
-                boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-              }}
-            >
-              <div>
-                <h3
-                  style={{
-                    fontSize: "1.2rem",
-                    color: "#007bff",
-                    margin: "0 0 5px",
-                  }}
-                >
-                  {notif.title}
-                </h3>
-                <p style={{ fontSize: "1rem", color: "#555", margin: "0" }}>
-                  {notif.message}
-                </p>
-              </div>
-              <div>
-                {!notif.is_read && (
-                  <button
-                    onClick={() => markAsRead(notif.id)}
+          notifications
+            .filter((notif) => notif.is_visible) // Filtrar las notificaciones visibles
+            .map((notif) => (
+              <div
+                key={notif.id}
+                style={{
+                  width: "90%",
+                  maxWidth: "400px",
+                  border: "1px solid #ccc",
+                  borderRadius: "10px",
+                  padding: "15px",
+                  backgroundColor: notif.is_read ? "#fff" : "#f0f0f0",
+                  boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                }}
+              >
+                <div>
+                  <h3
                     style={{
-                      backgroundColor: "#fff",
-                      color: "black",
-                      border: "solid",
+                      fontSize: "1.2rem",
+                      color: "#007bff",
+                      margin: "0 0 5px",
+                    }}
+                  >
+                    {notif.title}
+                  </h3>
+                  <p style={{ fontSize: "1rem", color: "#555", margin: "0" }}>
+                    {notif.message}
+                  </p>
+                  <p
+                    style={{
+                      fontSize: "0.9rem",
+                      color: "#888",
+                      marginTop: "5px",
+                    }}
+                  >
+                    Fecha: {formatDate(notif.created_at)}
+                  </p>
+                </div>
+                <div>
+                  {!notif.is_read && (
+                    <button
+                      onClick={() => markAsRead(notif.id)}
+                      style={{
+                        backgroundColor: "#fff",
+                        color: "black",
+                        border: "solid",
+                        borderRadius: "5px",
+                        padding: "5px 10px",
+                        cursor: "pointer",
+                        marginRight: "5px",
+                      }}
+                    >
+                      Leer
+                    </button>
+                  )}
+                  <button
+                    onClick={() => deleteNotification(notif.id)}
+                    style={{
+                      backgroundColor: "#ff0004",
+                      color: "white",
+                      border: "none",
                       borderRadius: "5px",
                       padding: "5px 10px",
                       cursor: "pointer",
-                      marginRight: "5px",
                     }}
                   >
-                    Leer
+                    Eliminar
                   </button>
-                )}
-                <button
-                  onClick={() => deleteNotification(notif.id)}
-                  style={{
-                    backgroundColor: "#ff0004",
-                    color: "white",
-                    border: "none",
-                    borderRadius: "5px",
-                    padding: "5px 10px",
-                    cursor: "pointer",
-                  }}
-                >
-                  Eliminar
-                </button>
+                </div>
               </div>
-            </div>
-          ))
+            ))
         ) : (
           <p style={{ fontSize: "1.2rem", color: "#888" }}>
             No tienes notificaciones.
